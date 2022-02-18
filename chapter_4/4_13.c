@@ -1,20 +1,26 @@
 static void swap(char a[], int i, int j);
-static int reverse(char a[], int i);
+static void reverse(char a[]);
+static int _reverse(char a[], int i);
 #include <stdio.h>
 int main(void) {
-  char a[] = "abcdefghijklmnop   qrstuvwxyz";
-  reverse(a, 0);
+  char a[] = "ab";
+  reverse(a);
   printf("%s\n", a); 
 }
 
-static int reverse(char a[], int i) {
+static int _reverse(char a[], int i) {
   if (a[i] == '\0') {
     return 0;
   }
-  int j = reverse(a, i + 1);
+  int j = _reverse(a, i + 1);
   if (j < i)
     swap(a, i, j);
   return j + 1;
+}
+
+/* Add a wrapper so we don't need to supply 0 as a consumer of the function*/
+static void reverse(char a[]) {
+  _reverse(a, 0);
 }
 
 static void swap(char a[], int i, int j) {
