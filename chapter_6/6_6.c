@@ -22,7 +22,7 @@ void ungetch(int c);
 int getch(void);
 
 #define MAXWORD 1000
-#define MAXLINES 20000
+#define MAXLINES 5000
 
 char* removecomments(char* line, int* stt)
 {
@@ -149,6 +149,7 @@ int main()
 {
   char* lines[MAXLINES] = {NULL};
   char** linep = lines;
+  char* tmp = NULL;
   char* newline = NULL;
   char* p = NULL;
   int state = 0;
@@ -160,25 +161,31 @@ int main()
   }
   for (linep = lines; *linep; ++linep) {
     /* Strip out comments */
-    *linep = removecomments(*linep, &state);
+    tmp = removecomments(*linep, &state);
+    free(*linep);
     /* extract defines */
-    *linep = preprocess(*linep);
+    *linep = preprocess(tmp);
 
     /* Now find and replace */
     oldmem = strlen(*linep) + 1;
     newline = malloc(oldmem);
     *newline = '\0';
+    tmp = *linep;
     while ((p = getwrd(*linep, linep, SPACE))) {
       struct nlist* nl;
       if ((nl = lookup(p))) {
+        free(p);
         /* Make space for our replacement word */
         newline = realloc(newline, (oldmem = (oldmem - strlen(nl->name) + strlen(nl->defn))));
-        p = nl->defn;
+        strcat(newline, nl->defn);
+      } else {
+        strcat(newline, p);
+        free(p);
       }
-      strcat(newline, p);
     }
-    *linep = newline;
-    printf("%s", *linep);
+    free(tmp);
+    printf("%s", newline);
+    free(newline);
   }
 
   return 0;
